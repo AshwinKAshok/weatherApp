@@ -8,6 +8,7 @@ import android.util.Log;
 import java.io.IOException;
 
 import okhttp3.Call;
+import okhttp3.Callback;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -32,15 +33,36 @@ public class MainActivity extends AppCompatActivity {
         final String TAG = MainActivity.class.getSimpleName();
 
         Call call = client.newCall(request);
-        try {
-            Response response = call.execute();
-            if(response.isSuccessful()){
-                Log.v( TAG, response.body().string());
+        call.enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+
             }
-        } catch (IOException e) {
-            Log.e( TAG,"Exception caught",e);
-        }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                try {
+                    Log.v( TAG, response.body().string());
+                    if(response.isSuccessful()){
+
+                    }
+                    else
+                    {
+                        onErrorAlert();
+                    }
+                } catch (IOException e) {
+                    Log.e( TAG,"Exception caught",e);
+                }
+
+            }
+        });
 
 
+
+    }
+
+    private void onErrorAlert() {
+        AlertDialogFragment dialog = new AlertDialogFragment();
+        dialog.show(getFragmentManager(),"Erro_dialog");
     }
 }
