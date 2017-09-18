@@ -3,11 +3,13 @@ package com.example.ashwi.weatherapp;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.nfc.Tag;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
 
@@ -19,6 +21,8 @@ import okhttp3.Response;
 
 
 public class MainActivity extends AppCompatActivity {
+    final String TAG = MainActivity.class.getSimpleName();
+    private CurrentWeather mCurrentWeather;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,7 +39,7 @@ public class MainActivity extends AppCompatActivity {
             OkHttpClient client = new OkHttpClient();
             Request request = new Request.Builder().url(forecastURL).build();
 
-            final String TAG = MainActivity.class.getSimpleName();
+
 
             Call call = client.newCall(request);
             call.enqueue(new Callback() {
@@ -47,13 +51,20 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onResponse(Call call, Response response) throws IOException {
                     try {
-                        Log.v(TAG, response.body().string());
+                        String jsonData = response.body().string();
+                        Log.v(TAG,"Hello");
+                        Log.v(TAG, jsonData);
                         if (response.isSuccessful()) {
+                            mCurrentWeather = getCurrentDetails(jsonData);
 
                         } else {
                             onErrorAlert();
                         }
                     } catch (IOException e) {
+                        Log.e(TAG, "Exception caught", e);
+                    }
+                    catch (JSONException e)
+                    {
                         Log.e(TAG, "Exception caught", e);
                     }
 
@@ -65,6 +76,33 @@ public class MainActivity extends AppCompatActivity {
         }
 
 
+
+    }
+
+    private CurrentWeather getCurrentDetails(String jsonData) throws JSONException{
+        JSONObject forecast = new JSONObject(jsonData);
+        String timezone = forecast.getString("timezone");
+        Log.i(TAG,"From JSON :"+ timezone);
+
+        JSONObject currently = forecast.getJSONObject("currently");
+        CurrentWeather currentWeather= new CurrentWeather();
+        currentWeather.setmHumidity(currently.getDouble("humidity"));
+        currentWeather.setmTime(currently.getLong("time"));
+        currentWeather.setmPrecipitation(currently.getDouble("precipProbability"));
+        currentWeather.setmIcon(currently.getString("icon"));
+        currentWeather.setmSummery(currently.getString("summary"));
+        currentWeather.setmTeamperature(currently.getDouble("temperature"));
+        currentWeather.setmTimeZone(timezone);
+
+        try{
+            Log.d(TAG,currentWeather.getFormattedTime());
+        }
+        catch (Exception e)
+        {
+            Log.e(TAG,"Exception is :",e);
+        }
+
+        return currentWeather;
 
     }
 
