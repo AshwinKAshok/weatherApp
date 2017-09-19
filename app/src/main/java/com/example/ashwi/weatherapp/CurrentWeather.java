@@ -90,8 +90,8 @@ public class CurrentWeather {
         return timeString;
     }
 
-    public double getmTeamperature() {
-        return mTeamperature;
+    public int getmTeamperature() {
+        return (int)Math.round(mTeamperature);
     }
 
     public void setmTeamperature(double mTeamperature) {
@@ -106,11 +106,14 @@ public class CurrentWeather {
         this.mHumidity = mHumidity;
     }
 
-    public double getmPrecipitation() {
-        return mPrecipitation;
+    public int getmPrecipitation() {
+        double precipChance = mPrecipitation*100;
+
+        return (int)Math.round(precipChance);
     }
 
     public void setmPrecipitation(double mPrecipitation) {
+
         this.mPrecipitation = mPrecipitation;
     }
 
